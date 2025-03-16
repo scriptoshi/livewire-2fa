@@ -1,8 +1,6 @@
 # Laravel Livewire 2FA
 
-A simple and elegant two-factor authentication package for Laravel 12 using Livewire.
-
-![Laravel 2FA Banner](https://via.placeholder.com/1200x400/3490dc/ffffff?text=Laravel+2FA)
+A simple and elegant two-factor authentication package for Laravel 12 using Livewire. Its built to work with laravel 12 livewire starter pack
 
 ## Overview
 
