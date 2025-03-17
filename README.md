@@ -63,7 +63,7 @@ class User extends Authenticatable
 
 ## Configuration
 
-The package comes with sensible defaults, but you can customize it via the `config/two-factor-auth.php` file:
+The package comes with sensible defaults, but you can customize it using the corresponding `.env` variables.
 
 ```php
 return [
