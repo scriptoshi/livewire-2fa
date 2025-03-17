@@ -40,7 +40,8 @@ trait ConfirmsTwoFactor
         $this->resetErrorBag();
 
         if ($this->twoFactorIsConfirmed()) {
-            return $this->dispatch('two-factor-confirmed', 
+            return $this->dispatch(
+                'two-factor-confirmed',
                 id: $confirmableId,
             );
         }
@@ -90,7 +91,8 @@ trait ConfirmsTwoFactor
 
         session(['auth.two_factor_confirmed_at' => time()]);
 
-        $this->dispatch('two-factor-confirmed',
+        $this->dispatch(
+            'two-factor-confirmed',
             id: $this->twoFactorConfirmableId,
         );
 
@@ -105,7 +107,7 @@ trait ConfirmsTwoFactor
      */
     protected function ensureTwoFactorIsConfirmed($maximumSecondsSinceConfirmation = null)
     {
-        $maximumSecondsSinceConfirmation = $maximumSecondsSinceConfirmation ?: config('auth.two_factor_timeout', 900);
+        $maximumSecondsSinceConfirmation = $maximumSecondsSinceConfirmation ?: config('two-factor-auth.timeout', 900);
 
         $this->twoFactorIsConfirmed($maximumSecondsSinceConfirmation) ? null : abort(403);
     }
@@ -118,7 +120,7 @@ trait ConfirmsTwoFactor
      */
     protected function twoFactorIsConfirmed($maximumSecondsSinceConfirmation = null)
     {
-        $maximumSecondsSinceConfirmation = $maximumSecondsSinceConfirmation ?: config('auth.two_factor_timeout', 900);
+        $maximumSecondsSinceConfirmation = $maximumSecondsSinceConfirmation ?: config('two-factor-auth.timeout', 900);
 
         return (time() - session('auth.two_factor_confirmed_at', 0)) < $maximumSecondsSinceConfirmation;
     }

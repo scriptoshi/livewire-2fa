@@ -78,13 +78,8 @@ return [
     'recovery_code_count' => env('TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT', 8),
 
     // Timeout for 2FA verification (in seconds, default 15 minutes)
-    'two_factor_timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
+    'timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
 
-    // Middleware for the 2FA routes
-    'middleware' => ['web', 'auth'],
-
-    // Route name for the challenge page
-    'challenge_route' => 'two-factor.challenge',
 ];
 ````
 

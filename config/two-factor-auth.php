@@ -65,32 +65,7 @@ return [
     |
     */
 
-    'two_factor_timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
+    'timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Two Factor Routes Middleware
-    |--------------------------------------------------------------------------
-    |
-    | This configuration option determines the middleware stack that should be
-    | used for the endpoints that are related to the two-factor authentication
-    | management. Typically, 'web' middleware is required as a minimum.
-    |
-    */
-
-    'middleware' => ['web', 'auth'],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Challenge Route
-    |--------------------------------------------------------------------------
-    |
-    | This configuration option determines the route name for the two-factor
-    | authentication challenge page. This is the page that users will see
-    | when logging in with 2FA enabled.
-    |
-    */
-
-    'challenge_route' => 'two-factor.challenge',
 
 ];

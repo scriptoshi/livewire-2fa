@@ -12,7 +12,7 @@ use Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords;
 class TwoFactorManagement extends Component
 {
     use ConfirmsPasswords;
-    
+
     /**
      * Indicates if 2FA is enabled.
      *
@@ -91,13 +91,13 @@ class TwoFactorManagement extends Component
     {
         // Ensure the user has confirmed their password before proceeding
         $this->ensurePasswordIsConfirmed();
-        
+
         $user = Auth::user();
 
         // Generate secret and recovery codes
         $user->forceFill([
             'two_factor_secret' => encrypt(TwoFactorAuth::generateSecretKey()),
-            'two_factor_recovery_codes' => encrypt(json_encode(Collection::times(8, function () {
+            'two_factor_recovery_codes' => encrypt(json_encode(Collection::times(config('two-factor-auth.recovery_code_count', 8), function () {
                 return TwoFactorAuth::generateRecoveryCode();
             })->all())),
         ])->save();
@@ -122,7 +122,7 @@ class TwoFactorManagement extends Component
     {
         // Ensure the user has confirmed their password before proceeding
         $this->ensurePasswordIsConfirmed();
-        
+
         $user = Auth::user();
 
         if (
@@ -180,7 +180,7 @@ class TwoFactorManagement extends Component
     {
         // Ensure the user has confirmed their password before proceeding
         $this->ensurePasswordIsConfirmed();
-        
+
         $user = Auth::user();
 
         if (!is_null($user->two_factor_recovery_codes)) {
@@ -197,11 +197,11 @@ class TwoFactorManagement extends Component
     {
         // Ensure the user has confirmed their password before proceeding
         $this->ensurePasswordIsConfirmed();
-        
+
         $user = Auth::user();
 
         $user->forceFill([
-            'two_factor_recovery_codes' => encrypt(json_encode(Collection::times(8, function () {
+            'two_factor_recovery_codes' => encrypt(json_encode(Collection::times(config('two-factor-auth.recovery_code_count', 8), function () {
                 return TwoFactorAuth::generateRecoveryCode();
             })->all())),
         ])->save();
@@ -219,7 +219,7 @@ class TwoFactorManagement extends Component
     {
         // Ensure the user has confirmed their password before proceeding
         $this->ensurePasswordIsConfirmed();
-        
+
         $user = Auth::user();
 
         $user->forceFill([
