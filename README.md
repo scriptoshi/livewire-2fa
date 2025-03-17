@@ -32,25 +32,25 @@ Laravel 2FA provides an easy way to add Google Authenticator compatible two-fact
 composer require scriptoshi/livewire-2fa
 ```
 
-### 2. Publish the assets (optional)
+### 2. (optional) If y/ou need to customize, publish the assets
 
 ```bash
 php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="config"
 php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="views"
-php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="js"
+php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="migrations"
 ```
 
 ### 3. Run the migrations
 
-This will add the necessary columns to your users table.
+This will add the required columns to your users table.
 
 ```bash
 php artisan migrate
 ```
 
-### 4. Add the trait to your User model
+### 4. Include the TwoFactorAuthenticatable trait in your User model
 
-```php
+````php
 use Scriptoshi\Livewire2fa\Traits\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
@@ -59,16 +59,6 @@ class User extends Authenticatable
 
     // ...
 }
-```
-
-### 5. Include the JavaScript (if using confirmation modals)
-
-Add the JavaScript file to your application's script bundle, or include it directly:
-
-```html
-<script src="{{ asset('js/vendor/two-factor-auth/two-factor-auth.js') }}"></script>
-```
-
 ## Configuration
 
 The package comes with sensible defaults, but you can customize it via the `config/two-factor-auth.php` file:
@@ -86,7 +76,7 @@ return [
 
     // Number of recovery codes to generate
     'recovery_code_count' => env('TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT', 8),
-    
+
     // Timeout for 2FA verification (in seconds, default 15 minutes)
     'two_factor_timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
 
@@ -96,7 +86,7 @@ return [
     // Route name for the challenge page
     'challenge_route' => 'two-factor.challenge',
 ];
-```
+````
 
 ## Basic Usage
 
@@ -117,9 +107,10 @@ Add the middleware to your login logic. If you're using Laravel's built-in authe
 1. Add this to your `routes/web.php`:
 
 ```php
+use Scriptoshi\Livewire2fa\Http\Middleware\TwoFactor;
 // Intercept login attempts and handle 2FA if needed
 Route::post('/login', [LoginController::class, 'login'])
-    ->middleware([Scriptoshi\Livewire2fa\Http\Middleware\RedirectIfTwoFactorAuthenticatable::class]);
+    ->middleware([TwoFactor::class]);
 ```
 
 Alternatively, you can modify your `LoginController` to use the middleware.
@@ -130,63 +121,88 @@ This package provides two types of confirmation modals for protecting sensitive 
 
 ### Password Confirmation Modal
 
-The password confirmation modal prompts users to enter their password before performing sensitive actions.
+Livewire components that contain an action that should require password confirmation before being invoked should use the Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords trait.
 
-1. Include the modal component in your template:
-
-```blade
-<livewire:password-confirmation-modal />
-```
-
-2. Trigger the modal when needed:
-
-```blade
-<flux:button 
-    wire:click="$dispatch('request-password-confirmation', { callback: 'deleteAccount' })"
->
-    Delete Account
-</flux:button>
-```
-
-3. Define the callback method in your Livewire component:
+After adding this trait to a component, you should call the ensurePasswordIsConfirmed method within any Livewire action that requires password confirmation. This should be done at the very beginning of the relevant action method:
 
 ```php
-#[On('deleteAccount')]
-public function deleteAccount()
+/**
+ * Enable administration mode for user.
+ */
+public function enableAdminMode(): void
 {
-    // This only runs after password confirmation
-    // Your sensitive action here
+    $this->ensurePasswordIsConfirmed();
+
+    // ...
+}
+```
+
+# how to use
+
+The password confirmation modal prompts users to enter their password before performing sensitive actions.
+
+1. Wrap the sensitive action in your component:
+
+```blade
+<x-confirms-password wire:then="enableAdminMode">
+    <x-button type="button" wire:loading.attr="disabled">
+        {{ __('Enable') }}
+    </x-button>
+</x-confirms-password>
+```
+
+2. Include the trait your Livewire component:
+
+```php
+use Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords
+
+class AdminForm extends Component
+{
+    use ConfirmsPasswords;
+    /**
+     * Enable administration mode for user.
+     */
+    public function enableAdminMode(): void
+    {
+        $this->ensurePasswordIsConfirmed();
+
+        // ...
+    }
 }
 ```
 
 ### Two-Factor Confirmation Modal
 
-For even higher security, you can require 2FA confirmation for critical operations.
+For even higher security, you can require 2FA confirmation for critical operations. You should then call ensureTwoFactorIsConfirmed method at the very beginning of the relevant action.
 
 1. Include the modal component in your template:
 
 ```blade
-<livewire:two-factor-confirmation-modal />
+<x-confirms-2fa wire:then="enableAdminMode">
+    <x-button type="button" wire:loading.attr="disabled">
+        {{ __('Disable') }}
+    </x-button>
+</x-confirms-2fa>
 ```
 
-2. Trigger the modal when needed:
-
-```blade
-<flux:button 
-    wire:click="$dispatch('request-2fa-confirmation', { callback: 'transferFunds' })"
->
-    Transfer Funds
-</flux:button>
-```
-
-3. Define the callback method in your Livewire component:
+2. Include the trait your Livewire component:
 
 ```php
-#[On('transferFunds')]
-public function transferFunds()
+use Scriptoshi\Livewire2fa\Traits\ConfirmsTwoFactor
+
+class TwoFactorAuthenticationForm extends Component
 {
-    // This only runs after 2FA confirmation
-    // Your highly sensitive action here
+    use ConfirmsTwoFactor;
+
+    /**
+     * Enable administration mode for user.
+     */
+    public function enableAdminMode(): void
+    {
+        $this->ensureTwoFactorIsConfirmed();
+
+        // ...
+    }
 }
 ```
 
@@ -239,47 +255,6 @@ The package dispatches Livewire events that you can listen for:
 -   `recovery-codes-generated` - When new recovery codes are generated
 
 Use these in your Livewire components to respond to 2FA actions.
-
-## Example Components
-
-The package includes example components to demonstrate how to use the confirmation modals:
-
-```blade
-<livewire:example-confirmation-modals />
-```
-
-This will show a page with examples of both password and 2FA confirmation.
-
-## Troubleshooting
-
-### QR Code Not Displaying
-
-Make sure your application has the `bacon/bacon-qr-code` package installed and that the user has a valid 2FA secret.
-
-### Challenge Screen Issues
-
-If users are not being redirected to the challenge screen correctly, ensure:
-
-1. The middleware is properly registered
-2. The `login.id` session variable is being set
-3. Route names are correct in your configuration
-
-### Modal Not Showing
-
-If confirmation modals are not appearing, check:
-
-1. You've included the JavaScript file
-2. The modal components are included in your template
-3. The event names match in your dispatch calls
-
-## Security Considerations
-
-This package implements several security best practices:
-
--   Encrypted storage of secrets and recovery codes
--   Rate limiting on verification attempts
--   Prevention of code reuse through timestamp verification
--   Secure modal confirmation for sensitive operations
 
 ## Contributing
 

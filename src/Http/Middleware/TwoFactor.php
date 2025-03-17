@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Scriptoshi\Livewire2fa\Traits\TwoFactorAuthenticatable;
 use Symfony\Component\HttpFoundation\Response;
 
-class RedirectIfTwoFactorAuthenticatable
+class TwoFactor
 {
     /**
      * The guard implementation.
