@@ -50,7 +50,7 @@ php artisan migrate
 
 ### 4. Include the TwoFactorAuthenticatable trait in your User model
 
-````php
+```php
 use Scriptoshi\Livewire2fa\Traits\TwoFactorAuthenticatable;
 
 class User extends Authenticatable
@@ -59,6 +59,8 @@ class User extends Authenticatable
 
     // ...
 }
+```
+
 ## Configuration
 
 The package comes with sensible defaults, but you can customize it via the `config/two-factor-auth.php` file:
@@ -81,7 +83,7 @@ return [
     'timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
 
 ];
-````
+```
 
 ## Basic Usage
 
