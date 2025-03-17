@@ -132,7 +132,7 @@ Volt::route('settings/twofactor', 'settings.twofactor')->name('settings.twofacto
 
 The easiest way to integrate 2FA with Laravel 12's Livewire login is by adding the `WithTwoFactorAuthentication` trait directly to your login component:
 
-1. Update your login.blade.php Volt component:
+1. Update your `resources/views/livewire/auth/login.blade.php` Volt component:
 
 ```php
 <?php

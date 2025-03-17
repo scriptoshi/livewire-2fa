@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Scriptoshi\Livewire2fa\Facades\TwoFactorAuth;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Session as LivewireSession;
 
 trait WithTwoFactorAuthentication
 {
@@ -54,7 +55,8 @@ trait WithTwoFactorAuthentication
      *
      * @var \Illuminate\Contracts\Auth\Authenticatable|null
      */
-    protected $twoFactorAuthenticatingUser = null;
+    #[LivewireSession]
+    public $twoFactorAuthenticatingUser = null;
 
     /**
      * Attempt a login with two-factor authentication support.
@@ -91,51 +93,43 @@ trait WithTwoFactorAuthentication
     public function verifyTwoFactorCode(): void
     {
         $this->resetErrorBag();
-
         if (!$this->twoFactorAuthenticatingUser) {
             $this->addError('twoFactorCode', __('Authentication error. Please try logging in again.'));
             return;
         }
-
-        $valid = false;
-
         if ($this->usingRecoveryCode) {
             // Verify the recovery code
-            $valid = collect($this->twoFactorAuthenticatingUser->recoveryCodes())->contains(
+            if (!collect($this->twoFactorAuthenticatingUser->recoveryCodes())->contains(
                 fn($code) => hash_equals($code, $this->recoveryCode)
-            );
-
-            if ($valid) {
-                // Replace the used recovery code
-                $user = clone $this->twoFactorAuthenticatingUser;
-                Auth::login($user);
-                $user->replaceRecoveryCode($this->recoveryCode);
-                Auth::logout();
-            } else {
+            )) {
                 $this->addError('recoveryCode', __('The provided recovery code is invalid.'));
                 return;
             }
-        } else {
-            // Verify the 2FA code
-            $valid = TwoFactorAuth::verify(
-                decrypt($this->twoFactorAuthenticatingUser->two_factor_secret),
-                $this->twoFactorCode
-            );
-
-            if (!$valid) {
-                $this->addError('twoFactorCode', __('The provided two-factor authentication code was invalid.'));
-                return;
-            }
+            $this->completeLogin();
+            return;
         }
-
-        if ($valid) {
-            // Complete the login
-            Auth::login($this->twoFactorAuthenticatingUser, $this->remember ?? false);
-            // Reset the 2FA state
-            $this->resetTwoFactorState();
-            // Redirect - we'll rely on the component's post-login redirect logic
-            $this->dispatch('auth-success');
+        if (!TwoFactorAuth::verify(
+            decrypt($this->twoFactorAuthenticatingUser->two_factor_secret),
+            $this->twoFactorCode
+        )) {
+            $this->addError('twoFactorCode', __('The provided two-factor authentication code was invalid.'));
+            return;
         }
+        $this->completeLogin();
+    }
+
+    protected function completeLogin()
+    {
+        $user = $this->twoFactorAuthenticatingUser;
+        Auth::login($user, $this->remember ?? false);
+        if ($this->recoveryCode) {
+            $user->replaceRecoveryCode($this->recoveryCode);
+        }
+        // Reset the 2FA state
+        $this->resetTwoFactorState();
+        // Redirect - we'll rely on the component's post-login redirect logic
+        RateLimiter::clear($this->throttleKey());
+        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
     /**
