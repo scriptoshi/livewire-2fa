@@ -32,7 +32,7 @@ Laravel 2FA provides an easy way to add Google Authenticator compatible two-fact
 composer require scriptoshi/livewire-2fa
 ```
 
-### 2. (optional) If y/ou need to customize, publish the assets
+### 2. (optional) If you need to customize, publish the assets
 
 ```bash
 php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="config"
@@ -79,28 +79,6 @@ TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT=8
 TWO_FACTOR_AUTH_TIMEOUT=600
 ```
 
-This is the config just in case. `config/two-factor-auth.php`
-
-```php
-return [
-    // Enable or disable 2FA functionality entirely
-    'enabled' => env('TWO_FACTOR_AUTH_ENABLED', true),
-
-    // Require users to confirm their 2FA setup with a code
-    'confirm_enable' => env('TWO_FACTOR_AUTH_CONFIRM', true),
-
-    // How many OTP codes will be accepted (time window)
-    'window' => env('TWO_FACTOR_AUTH_WINDOW', 1),
-
-    // Number of recovery codes to generate
-    'recovery_code_count' => env('TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT', 8),
-
-    // Timeout for 2FA verification (in seconds, default 15 minutes)
-    'timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
-
-];
-```
-
 ## Basic Usage
 
 ### Adding 2FA Management to User Profile
@@ -111,20 +89,22 @@ Add the Livewire component to your user profile page:
 <livewire:two-factor-management />
 ```
 
-On laravel 12 Starter pack Edit `resources/views/components/settings/layout.blade.php` Add the
+On Laravel 12 Starter kit:
+
+1. Edit `resources/views/components/settings/layout.blade.php` and add:
 
 ```blade
- <flux:navlist>
-        <flux:navlist.item :href="route('settings.profile')" wire:navigate>{{ __('Profile') }}</flux:navlist.item>
-        <flux:navlist.item :href="route('settings.password')" wire:navigate>{{ __('Password') }}</flux:navlist.item>
-        <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
-        <!--Add two factor-->
-        <flux:navlist.item :href="route('settings.twofactor')" wire:navigate>{{ __('Two factor Auth') }}</flux:navlist.item>
-    </flux:navlist>
+<flux:navlist>
+    <flux:navlist.item :href="route('settings.profile')" wire:navigate>{{ __('Profile') }}</flux:navlist.item>
+    <flux:navlist.item :href="route('settings.password')" wire:navigate>{{ __('Password') }}</flux:navlist.item>
+    <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+    <!--Add two factor-->
+    <flux:navlist.item :href="route('settings.twofactor')" wire:navigate>{{ __('Two factor Auth') }}</flux:navlist.item>
+</flux:navlist>
 ```
 
-Create the two factor auth view.
-`resources/views/livewire/settings/twofactor.blade.php`
+2. Create the two factor auth view:
+   `resources/views/livewire/settings/twofactor.blade.php`
 
 ```blade
 <?php
@@ -140,116 +120,114 @@ new class extends Component {
         <livewire:two-factor-management />
     </x-settings.layout>
 </section>
-
 ```
 
-Add the route to `routes/web.php`
-`Volt::route('settings/twofactor', 'settings.twofactor')->name('settings.twofactor');`
-
-That's it! The component will handle enabling, disabling, and managing 2FA for the user.
-
-### Integrating with Login
-
-Add the middleware to your login logic. If you're using Laravel's built-in authentication:
-
-1. Add this to your `routes/web.php`:
+3. Add the route to `routes/web.php`:
 
 ```php
-use Scriptoshi\Livewire2fa\Http\Middleware\TwoFactor;
-// Intercept login attempts and handle 2FA if needed
-Route::post('/login', [LoginController::class, 'login'])
-    ->middleware([TwoFactor::class]);
+Volt::route('settings/twofactor', 'settings.twofactor')->name('settings.twofactor');
 ```
 
-Alternatively, you can modify your `LoginController` to use the middleware.
+### Integrating with Login (Laravel 12 Starter Kit)
+
+The easiest way to integrate 2FA with Laravel 12's Livewire login is by adding the `WithTwoFactorAuthentication` trait directly to your login component:
+
+1. Update your login.blade.php Volt component:
+
+```php
+<?php
+
+use Scriptoshi\Livewire2fa\Traits\WithTwoFactorAuthentication;
+
+new #[Layout('components.layouts.auth')] class extends Component {
+    use WithTwoFactorAuthentication; // add this line
+
+   ..... rest of the code
+
+}; ?>
+```
+
+update the Login method on the form submit from `wire:submit="login"` to `wire:submit="twoFactorLogin"`
+
+```html
+<form wire:submit="twoFactorLogin">.... rest of the form</form>
+```
+
+Include the 2FA Modal after the form closing tag.
+
+```html
+ </form>  <!-- Form -->
+    <!-- Include the 2FA Modal -->
+    <x-two-factor-auth-modal />
+```
+
+That's it! The login component will now:
+
+1. Attempt normal login with email/password
+2. Check if the user has 2FA enabled
+3. If 2FA is enabled, show the 2FA modal for code verification
+4. Complete the login process after successful 2FA verification
 
 ## Using Confirmation Modals
 
-This package provides two types of confirmation modals for protecting sensitive actions:
+For sensitive actions in your application, you can require password or 2FA verification:
 
 ### Password Confirmation Modal
-
-Livewire components that contain an action that should require password confirmation before being invoked should use the Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords trait.
-
-After adding this trait to a component, you should call the ensurePasswordIsConfirmed method within any Livewire action that requires password confirmation. This should be done at the very beginning of the relevant action method:
-
-```php
-/**
- * Enable administration mode for user.
- */
-public function enableAdminMode(): void
-{
-    $this->ensurePasswordIsConfirmed();
-
-    // ...
-}
-```
-
-# how to use
-
-The password confirmation modal prompts users to enter their password before performing sensitive actions.
 
 1. Wrap the sensitive action in your component:
 
 ```blade
 <x-confirms-password wire:then="enableAdminMode">
-    <x-button type="button" wire:loading.attr="disabled">
+    <flux:button type="button" wire:loading.attr="disabled">
         {{ __('Enable') }}
-    </x-button>
+    </flux:button>
 </x-confirms-password>
 ```
 
-2. Include the trait your Livewire component:
+2. Include the trait in your Livewire component:
 
 ```php
-use Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords
+use Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords;
 
 class AdminForm extends Component
 {
     use ConfirmsPasswords;
-    /**
-     * Enable administration mode for user.
-     */
+
     public function enableAdminMode(): void
     {
         $this->ensurePasswordIsConfirmed();
-
-        // ...
+        // Action logic here
     }
 }
 ```
 
 ### Two-Factor Confirmation Modal
 
-For even higher security, you can require 2FA confirmation for critical operations. You should then call ensureTwoFactorIsConfirmed method at the very beginning of the relevant action.
+For even higher security, you can require 2FA confirmation for critical operations:
 
 1. Include the modal component in your template:
 
 ```blade
 <x-confirms-2fa wire:then="enableAdminMode">
-    <x-button type="button" wire:loading.attr="disabled">
-        {{ __('Disable') }}
-    </x-button>
+    <flux:button type="button" wire:loading.attr="disabled">
+        {{ __('Perform Critical Action') }}
+    </flux:button>
 </x-confirms-2fa>
 ```
 
-2. Include the trait your Livewire component:
+2. Include the trait in your Livewire component:
 
 ```php
-use Scriptoshi\Livewire2fa\Traits\ConfirmsTwoFactor
+use Scriptoshi\Livewire2fa\Traits\ConfirmsTwoFactor;
 
 class TwoFactorAuthenticationForm extends Component
 {
     use ConfirmsTwoFactor;
 
-    /**
-     * Enable administration mode for user.
-     */
     public function enableAdminMode(): void
     {
         $this->ensureTwoFactorIsConfirmed();
-
-        // ...
+        // Action logic here
     }
 }
 ```
@@ -274,9 +252,7 @@ The components use Flux components and support dark mode out of the box. You can
 2. Modifying the Flux component usage or class attributes
 3. For more extensive customization, you can extend or override the Livewire components
 
-## Advanced Usage
-
-### Using the Facade Directly
+## Using the Facade Directly
 
 You can use the `TwoFactorAuth` facade directly for advanced use cases:
 
@@ -292,21 +268,6 @@ $valid = TwoFactorAuth::verify($secret, $code);
 // Generate QR code SVG
 $svg = TwoFactorAuth::generateQrCodeSvg($appName, $email, $secret);
 ```
-
-### Event Handling
-
-The package dispatches Livewire events that you can listen for:
-
--   `two-factor-enabled` - When 2FA is enabled
--   `two-factor-confirmed` - When 2FA setup is confirmed
--   `two-factor-disabled` - When 2FA is disabled
--   `recovery-codes-generated` - When new recovery codes are generated
-
-Use these in your Livewire components to respond to 2FA actions.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
