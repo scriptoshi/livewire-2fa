@@ -2,7 +2,6 @@
 
 namespace Scriptoshi\Livewire2fa\Traits;
 
-use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -40,7 +39,8 @@ trait ConfirmsPasswords
         $this->resetErrorBag();
 
         if ($this->passwordIsConfirmed()) {
-            return $this->dispatch('password-confirmed', 
+            return $this->dispatch(
+                'password-confirmed',
                 id: $confirmableId,
             );
         }
@@ -79,7 +79,8 @@ trait ConfirmsPasswords
 
         session(['auth.password_confirmed_at' => time()]);
 
-        $this->dispatch('password-confirmed',
+        $this->dispatch(
+            'password-confirmed',
             id: $this->confirmableId,
         );
 
@@ -94,7 +95,7 @@ trait ConfirmsPasswords
      */
     protected function verifyPassword($password)
     {
-        return app(StatefulGuard::class)->validate([
+        return Auth::guard()->validate([
             'email' => Auth::user()->email,
             'password' => $password,
         ]);

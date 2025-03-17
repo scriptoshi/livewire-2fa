@@ -62,12 +62,13 @@ class TwoFactorManagement extends Component
      */
     public function mount()
     {
+
         $user = Auth::user();
 
         $this->enabled = $user->hasEnabledTwoFactorAuthentication();
 
         if ($this->enabled) {
-            $this->recoveryCodes = $user->two_factor_recovery_codes;
+            //$this->recoveryCodes = $user->two_factor_recovery_codes;
 
             // Check if confirmation is required but not yet provided
             if (
@@ -189,6 +190,16 @@ class TwoFactorManagement extends Component
     }
 
     /**
+     * Display the recovery codes to the user.
+     *
+     * @return void
+     */
+    public function hideRecoveryCodes()
+    {
+        $this->recoveryCodes = null;
+    }
+
+    /**
      * Generate new recovery codes for the user.
      *
      * @return void
@@ -244,6 +255,7 @@ class TwoFactorManagement extends Component
      */
     public function render()
     {
+
         return view('two-factor-auth::livewire.two-factor-management');
     }
 }

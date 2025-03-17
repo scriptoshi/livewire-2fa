@@ -111,6 +111,41 @@ Add the Livewire component to your user profile page:
 <livewire:two-factor-management />
 ```
 
+On laravel 12 Starter pack Edit `resources/views/components/settings/layout.blade.php` Add the
+
+```blade
+ <flux:navlist>
+        <flux:navlist.item :href="route('settings.profile')" wire:navigate>{{ __('Profile') }}</flux:navlist.item>
+        <flux:navlist.item :href="route('settings.password')" wire:navigate>{{ __('Password') }}</flux:navlist.item>
+        <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+        <!--Add two factor-->
+        <flux:navlist.item :href="route('settings.twofactor')" wire:navigate>{{ __('Two factor Auth') }}</flux:navlist.item>
+    </flux:navlist>
+```
+
+Create the two factor auth view.
+`resources/views/livewire/settings/twofactor.blade.php`
+
+```blade
+<?php
+use Livewire\Volt\Component;
+
+new class extends Component {
+
+}; ?>
+
+<section class="w-full">
+    @include('partials.settings-heading')
+    <x-settings.layout :heading="__('Two Factor Auth')" :subheading="__('Manage two factor authentication')">
+        <livewire:two-factor-management />
+    </x-settings.layout>
+</section>
+
+```
+
+Add the route to `routes/web.php`
+`Volt::route('settings/twofactor', 'settings.twofactor')->name('settings.twofactor');`
+
 That's it! The component will handle enabling, disabling, and managing 2FA for the user.
 
 ### Integrating with Login
