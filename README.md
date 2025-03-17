@@ -64,6 +64,22 @@ class User extends Authenticatable
 ## Configuration
 
 The package comes with sensible defaults, but you can customize it using the corresponding `.env` variables.
+Add the following lines to your .env to customise the config
+
+```bash
+# Enable or disable 2FA functionality entirely
+TWO_FACTOR_AUTH_ENABLED=true
+# Require users to confirm their 2FA setup with a code
+TWO_FACTOR_AUTH_CONFIRM=true
+# How many OTP codes will be accepted (time window)
+TWO_FACTOR_AUTH_WINDOW=1
+# Number of recovery codes to generate
+TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT=8
+# Timeout for 2FA verification (in seconds, default 15 minutes)
+TWO_FACTOR_AUTH_TIMEOUT=600
+```
+
+This is the config just in case. `config/two-factor-auth.php`
 
 ```php
 return [
