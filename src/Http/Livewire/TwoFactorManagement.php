@@ -7,9 +7,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Scriptoshi\Livewire2fa\Facades\TwoFactorAuth;
+use Scriptoshi\Livewire2fa\Traits\ConfirmsPasswords;
 
 class TwoFactorManagement extends Component
 {
+    use ConfirmsPasswords;
+    
     /**
      * Indicates if 2FA is enabled.
      *
@@ -86,6 +89,9 @@ class TwoFactorManagement extends Component
      */
     public function enableTwoFactorAuthentication()
     {
+        // Ensure the user has confirmed their password before proceeding
+        $this->ensurePasswordIsConfirmed();
+        
         $user = Auth::user();
 
         // Generate secret and recovery codes
@@ -114,6 +120,9 @@ class TwoFactorManagement extends Component
      */
     public function confirmTwoFactorAuthentication()
     {
+        // Ensure the user has confirmed their password before proceeding
+        $this->ensurePasswordIsConfirmed();
+        
         $user = Auth::user();
 
         if (
@@ -169,6 +178,9 @@ class TwoFactorManagement extends Component
      */
     public function showRecoveryCodes()
     {
+        // Ensure the user has confirmed their password before proceeding
+        $this->ensurePasswordIsConfirmed();
+        
         $user = Auth::user();
 
         if (!is_null($user->two_factor_recovery_codes)) {
@@ -183,6 +195,9 @@ class TwoFactorManagement extends Component
      */
     public function regenerateRecoveryCodes()
     {
+        // Ensure the user has confirmed their password before proceeding
+        $this->ensurePasswordIsConfirmed();
+        
         $user = Auth::user();
 
         $user->forceFill([
@@ -202,6 +217,9 @@ class TwoFactorManagement extends Component
      */
     public function disableTwoFactorAuthentication()
     {
+        // Ensure the user has confirmed their password before proceeding
+        $this->ensurePasswordIsConfirmed();
+        
         $user = Auth::user();
 
         $user->forceFill([

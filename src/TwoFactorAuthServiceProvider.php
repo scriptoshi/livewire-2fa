@@ -8,6 +8,8 @@ use Livewire\Livewire;
 use PragmaRX\Google2FA\Google2FA;
 use Scriptoshi\Livewire2fa\Http\Livewire\TwoFactorChallenge;
 use Scriptoshi\Livewire2fa\Http\Livewire\TwoFactorManagement;
+use Scriptoshi\Livewire2fa\Http\Livewire\PasswordConfirmationModal;
+use Scriptoshi\Livewire2fa\Http\Livewire\TwoFactorConfirmationModal;
 
 class TwoFactorAuthServiceProvider extends ServiceProvider
 {
@@ -56,8 +58,11 @@ class TwoFactorAuthServiceProvider extends ServiceProvider
                 __DIR__ . '/../database/migrations' => database_path('migrations'),
             ], 'migrations');
         }
+        // Register Blade components
+        Blade::component('two-factor-auth::components.confirms-password', 'confirms-password');
+        Blade::component('two-factor-auth::components.confirms-2fa', 'confirms-2fa');
 
-        // Register Livewire components
+        // Register confirmation modal components
         Livewire::component('two-factor-challenge', TwoFactorChallenge::class);
         Livewire::component('two-factor-management', TwoFactorManagement::class);
     }

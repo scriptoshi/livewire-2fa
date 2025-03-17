@@ -17,20 +17,30 @@
         <div class="mt-4" x-data="{}"
             x-on:confirming-two-factor-authentication.window="setTimeout(() => $refs.code.focus(), 250)">
             @if (!$recovery)
-                <div>
-                    <x-label for="code" value="{{ __('Code') }}" />
-                    <x-input wire:model="code" id="code" class="block mt-1 w-full" type="text" inputmode="numeric"
-                        name="code" autofocus autocomplete="one-time-code" />
-                </div>
+                <flux:input 
+                    wire:model="code" 
+                    id="code" 
+                    label="{{ __('Code') }}"
+                    type="text" 
+                    class="w-full" 
+                    inputmode="numeric"
+                    name="code" 
+                    autofocus 
+                    autocomplete="one-time-code" 
+                />
             @else
-                <div>
-                    <x-label for="recovery_code" value="{{ __('Recovery Code') }}" />
-                    <x-input wire:model="recovery_code" id="recovery_code" class="block mt-1 w-full" type="text"
-                        name="recovery_code" autocomplete="one-time-code" />
-                </div>
+                <flux:input 
+                    wire:model="recovery_code" 
+                    id="recovery_code" 
+                    label="{{ __('Recovery Code') }}"
+                    type="text"
+                    class="w-full"
+                    name="recovery_code" 
+                    autocomplete="one-time-code" 
+                />
             @endif
 
-            <x-input-error :for="$recovery ? 'recovery_code' : 'code'" class="mt-2" />
+            <flux:error name="{{ $recovery ? 'recovery_code' : 'code' }}" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
@@ -40,9 +50,9 @@
                 {{ $recovery ? __('Use an authentication code') : __('Use a recovery code') }}
             </button>
 
-            <x-button class="ml-4">
+            <flux:button class="ml-4">
                 {{ __('Log in') }}
-            </x-button>
+            </flux:button>
         </div>
     </form>
 </div>

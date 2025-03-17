@@ -1,21 +1,21 @@
 <div>
     <section class="space-y-6">
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <flux:heading size="lg">
                 {{ __('Two Factor Authentication') }}
-            </h2>
+            </flux:heading>
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <flux:subheading>
                 {{ __('Add additional security to your account using two factor authentication.') }}
-            </p>
+            </flux:subheading>
         </header>
 
         <div class="mt-5 space-y-6">
             @if (! $this->enabled)
                 <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    <flux:heading size="md">
                         {{ __('You have not enabled two factor authentication.') }}
-                    </h3>
+                    </flux:heading>
 
                     <div class="mt-3 max-w-xl text-sm text-gray-600 dark:text-gray-400">
                         <p>
@@ -25,21 +25,21 @@
 
                     <div class="mt-5">
                         <x-confirms-password wire:then="enableTwoFactorAuthentication">
-                            <x-button type="button" wire:loading.attr="disabled">
+                            <flux:button type="button" wire:loading.attr="disabled">
                                 {{ __('Enable') }}
-                            </x-button>
+                            </flux:button>
                         </x-confirms-password>
                     </div>
                 </div>
             @else
                 <div class="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-md">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                    <flux:heading size="md">
                         @if ($this->confirming)
                             {{ __('Finish enabling two factor authentication.') }}
                         @else
                             {{ __('You have enabled two factor authentication.') }}
                         @endif
-                    </h3>
+                    </flux:heading>
 
                     <div class="mt-3 max-w-xl text-sm text-gray-600 dark:text-gray-400">
                         <p>
@@ -72,12 +72,19 @@
 
                         @if ($this->confirming)
                             <div class="mt-4">
-                                <x-label for="code" value="{{ __('Code') }}" />
+                                <flux:input 
+                                    wire:model="confirmationCode" 
+                                    id="code" 
+                                    label="{{ __('Code') }}"
+                                    type="text" 
+                                    name="code" 
+                                    class="w-1/2" 
+                                    inputmode="numeric"
+                                    autofocus 
+                                    autocomplete="one-time-code" 
+                                />
 
-                                <x-input id="code" type="text" name="code" class="block mt-1 w-1/2" inputmode="numeric"
-                                    wire:model="confirmationCode" autofocus autocomplete="one-time-code" />
-
-                                <x-input-error :for="'confirmationCode'" class="mt-2" />
+                                <flux:error name="confirmationCode" class="mt-2" />
                             </div>
                         @endif
                     @endif
@@ -99,37 +106,37 @@
                     <div class="mt-5 space-x-3">
                         @if ($this->confirming)
                             <x-confirms-password wire:then="confirmTwoFactorAuthentication">
-                                <x-button type="button" class="mr-3" wire:loading.attr="disabled">
+                                <flux:button type="button" class="mr-3" wire:loading.attr="disabled">
                                     {{ __('Confirm') }}
-                                </x-button>
+                                </flux:button>
                             </x-confirms-password>
                         @else
                             @if (! empty($this->recoveryCodes))
                                 <x-confirms-password wire:then="regenerateRecoveryCodes">
-                                    <x-button type="button" class="mr-3">
+                                    <flux:button type="button" class="mr-3">
                                         {{ __('Regenerate Recovery Codes') }}
-                                    </x-button>
+                                    </flux:button>
                                 </x-confirms-password>
                             @else
                                 <x-confirms-password wire:then="showRecoveryCodes">
-                                    <x-button type="button" class="mr-3">
+                                    <flux:button type="button" class="mr-3">
                                         {{ __('Show Recovery Codes') }}
-                                    </x-button>
+                                    </flux:button>
                                 </x-confirms-password>
                             @endif
                         @endif
 
                         @if ($this->confirming)
                             <x-confirms-password wire:then="disableTwoFactorAuthentication">
-                                <x-secondary-button wire:loading.attr="disabled">
+                                <flux:button variant="ghost" wire:loading.attr="disabled">
                                     {{ __('Cancel') }}
-                                </x-secondary-button>
+                                </flux:button>
                             </x-confirms-password>
                         @else
                             <x-confirms-password wire:then="disableTwoFactorAuthentication">
-                                <x-danger-button wire:loading.attr="disabled">
+                                <flux:button variant="danger" wire:loading.attr="disabled">
                                     {{ __('Disable') }}
-                                </x-danger-button>
+                                </flux:button>
                             </x-confirms-password>
                         @endif
                     </div>

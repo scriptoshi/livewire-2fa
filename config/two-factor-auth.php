@@ -56,6 +56,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Two Factor Authentication Timeout
+    |--------------------------------------------------------------------------
+    |
+    | This configuration option determines how long (in seconds) a successful
+    | two-factor authentication is valid before requiring re-verification.
+    | Default is 15 minutes (900 seconds).
+    |
+    */
+
+    'two_factor_timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
+
+    /*
+    |--------------------------------------------------------------------------
     | Two Factor Routes Middleware
     |--------------------------------------------------------------------------
     |

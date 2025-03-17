@@ -1,26 +1,28 @@
 # Laravel Livewire 2FA
 
-A simple and elegant two-factor authentication package for Laravel 12 using Livewire. Its built to work with laravel 12 livewire starter pack
+A simple and elegant two-factor authentication package for Laravel 12 using Livewire and Flux components. Built to work seamlessly with Laravel 12's authentication stack.
 
 ## Overview
 
-Laravel 2FA provides an easy way to add Google Authenticator compatible two-factor authentication to your Laravel 12 application. Built with Livewire and Alpine.js, it offers a modern, interactive user experience with minimal configuration.
+Laravel 2FA provides an easy way to add Google Authenticator compatible two-factor authentication to your Laravel 12 application. Built with Livewire and Flux components, it offers a modern, interactive user experience with minimal configuration.
 
 ### Features
 
 -   🔒 Google Authenticator compatible (TOTP)
 -   ⚡ Livewire-powered interactive components
--   🌓 Full dark mode support with Tailwind CSS
+-   🎨 Beautiful UI with Flux components
+-   🌓 Full dark mode support
 -   🛠️ Simple integration with existing authentication systems
 -   🔑 Recovery codes for account access backup
--   🎨 Easily customizable views
--   🛡️ Built-in security features and rate limiting
+-   🛡️ On-demand password and 2FA confirmation modals
+-   🔄 Compatible with Laravel 12 and Livewire 3
 
 ## Requirements
 
 -   PHP 8.2+
 -   Laravel 12.x
 -   Livewire 3.x
+-   Flux components
 
 ## Installation
 
@@ -35,6 +37,7 @@ composer require scriptoshi/livewire-2fa
 ```bash
 php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="config"
 php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="views"
+php artisan vendor:publish --provider="Scriptoshi\Livewire2fa\TwoFactorAuthServiceProvider" --tag="js"
 ```
 
 ### 3. Run the migrations
@@ -58,6 +61,14 @@ class User extends Authenticatable
 }
 ```
 
+### 5. Include the JavaScript (if using confirmation modals)
+
+Add the JavaScript file to your application's script bundle, or include it directly:
+
+```html
+<script src="{{ asset('js/vendor/two-factor-auth/two-factor-auth.js') }}"></script>
+```
+
 ## Configuration
 
 The package comes with sensible defaults, but you can customize it via the `config/two-factor-auth.php` file:
@@ -75,6 +86,9 @@ return [
 
     // Number of recovery codes to generate
     'recovery_code_count' => env('TWO_FACTOR_AUTH_RECOVERY_CODE_COUNT', 8),
+    
+    // Timeout for 2FA verification (in seconds, default 15 minutes)
+    'two_factor_timeout' => env('TWO_FACTOR_AUTH_TIMEOUT', 900),
 
     // Middleware for the 2FA routes
     'middleware' => ['web', 'auth'],
@@ -110,6 +124,72 @@ Route::post('/login', [LoginController::class, 'login'])
 
 Alternatively, you can modify your `LoginController` to use the middleware.
 
+## Using Confirmation Modals
+
+This package provides two types of confirmation modals for protecting sensitive actions:
+
+### Password Confirmation Modal
+
+The password confirmation modal prompts users to enter their password before performing sensitive actions.
+
+1. Include the modal component in your template:
+
+```blade
+<livewire:password-confirmation-modal />
+```
+
+2. Trigger the modal when needed:
+
+```blade
+<flux:button 
+    wire:click="$dispatch('request-password-confirmation', { callback: 'deleteAccount' })"
+>
+    Delete Account
+</flux:button>
+```
+
+3. Define the callback method in your Livewire component:
+
+```php
+#[On('deleteAccount')]
+public function deleteAccount()
+{
+    // This only runs after password confirmation
+    // Your sensitive action here
+}
+```
+
+### Two-Factor Confirmation Modal
+
+For even higher security, you can require 2FA confirmation for critical operations.
+
+1. Include the modal component in your template:
+
+```blade
+<livewire:two-factor-confirmation-modal />
+```
+
+2. Trigger the modal when needed:
+
+```blade
+<flux:button 
+    wire:click="$dispatch('request-2fa-confirmation', { callback: 'transferFunds' })"
+>
+    Transfer Funds
+</flux:button>
+```
+
+3. Define the callback method in your Livewire component:
+
+```php
+#[On('transferFunds')]
+public function transferFunds()
+{
+    // This only runs after 2FA confirmation
+    // Your highly sensitive action here
+}
+```
+
 ## Customization
 
 ### Views
@@ -124,10 +204,10 @@ This will publish the views to `resources/views/vendor/two-factor-auth/`.
 
 ### Styling
 
-The components use Tailwind CSS classes and support dark mode out of the box. You can customize the appearance by:
+The components use Flux components and support dark mode out of the box. You can customize the appearance by:
 
 1. Publishing the views (as shown above)
-2. Modifying the Tailwind classes or adding your own CSS
+2. Modifying the Flux component usage or class attributes
 3. For more extensive customization, you can extend or override the Livewire components
 
 ## Advanced Usage
@@ -160,6 +240,16 @@ The package dispatches Livewire events that you can listen for:
 
 Use these in your Livewire components to respond to 2FA actions.
 
+## Example Components
+
+The package includes example components to demonstrate how to use the confirmation modals:
+
+```blade
+<livewire:example-confirmation-modals />
+```
+
+This will show a page with examples of both password and 2FA confirmation.
+
 ## Troubleshooting
 
 ### QR Code Not Displaying
@@ -174,6 +264,14 @@ If users are not being redirected to the challenge screen correctly, ensure:
 2. The `login.id` session variable is being set
 3. Route names are correct in your configuration
 
+### Modal Not Showing
+
+If confirmation modals are not appearing, check:
+
+1. You've included the JavaScript file
+2. The modal components are included in your template
+3. The event names match in your dispatch calls
+
 ## Security Considerations
 
 This package implements several security best practices:
@@ -181,6 +279,7 @@ This package implements several security best practices:
 -   Encrypted storage of secrets and recovery codes
 -   Rate limiting on verification attempts
 -   Prevention of code reuse through timestamp verification
+-   Secure modal confirmation for sensitive operations
 
 ## Contributing
 
