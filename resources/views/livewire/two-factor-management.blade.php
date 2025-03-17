@@ -1,6 +1,6 @@
 <section class="mt-5 space-y-6 w-full">
     @if (!$this->enabled)
-        <div class="rounded  bg-white dark:bg-gray-800 ">
+        <div class="rounded  bg-white dark:bg-gray-850 ">
             <flux:heading size="lg">
                 {{ __('You have not enabled two factor authentication.') }}
             </flux:heading>
@@ -20,7 +20,7 @@
             </div>
         </div>
     @else
-        <div class="rounded  bg-white dark:bg-gray-800 ">
+        <div class="rounded  bg-white dark:bg-gray-850 ">
             <flux:heading size="lg">
                 @if ($this->confirming)
                     {{ __('Finish enabling two factor authentication.') }}
