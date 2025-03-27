@@ -61,7 +61,7 @@ class TwoFactorChallenge extends Component
      * @param \Illuminate\Contracts\Auth\StatefulGuard $guard
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function authenticate(StatefulGuard $guard = null)
+    public function authenticate(?StatefulGuard $guard = null)
     {
         $guard = $guard ?: Auth::guard();
         $this->resetErrorBag();
