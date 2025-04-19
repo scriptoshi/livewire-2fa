@@ -1,4 +1,4 @@
-<flux:modal wire:model.live="showingTwoFactorModal" class="md:w-96">
+<flux:modal wire:model.live="showingTwoFactorModal" class="md:w-96 overflow-hidden">
     <div class="space-y-6">
         <div>
             <flux:heading size="lg">{{ __('Two Factor Authentication') }}</flux:heading>

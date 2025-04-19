@@ -15,7 +15,7 @@
 </span>
 
 @once
-<flux:modal wire:model.live="confirmingTwoFactor" class="md:w-96">
+<flux:modal wire:model.live="confirmingTwoFactor" class="md:w-96 overflow-hidden">
     <div class="space-y-6">
         <div>
             <flux:heading size="lg">{{ $title }}</flux:heading>
